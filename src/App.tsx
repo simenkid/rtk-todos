@@ -1,4 +1,8 @@
-import React from "react";
+import * as React from "react";
+
+import { useState } from "react";
+import { useSelector, useDispatch } from "react-redux";
+
 import {
   Provider,
   defaultTheme,
@@ -11,74 +15,111 @@ import {
   View,
   ListBox,
   Item,
+  Heading,
+  Content,
 } from "@adobe/react-spectrum";
 
-import { v1 as uuid } from "uuid";
-import { Todo } from "./type";
+import { State } from "./type";
 
 import "./App.css";
 
+import {
+  createTodoActionCreator,
+  // editTodoActionCreator,
+  // toggleTodoActionCreator,
+  // deleteTodoActionCreator,
+  // selectedTodoActionCreator,
+} from "./redux-toolkit";
+import { combineReducers } from "@reduxjs/toolkit";
+
 function App() {
-  const todos: Todo[] = [
-    {
-      id: uuid(),
-      desc: "Learn React",
-      isComplete: true,
-    },
-    {
-      id: uuid(),
-      desc: "Learn Redux",
-      isComplete: true,
-    },
-    {
-      id: uuid(),
-      desc: "Learn Redux-ToolKit",
-      isComplete: false,
-    },
-  ];
+  const dispatch = useDispatch();
+  const todos = useSelector((state: State) => state.todos);
+  //const selectedTodoId = useSelector((state: State) => state.selectedTodo);
+  //const editedCount = useSelector((state: State) => state.counter);
+
+  // hooks for private state
+  const [newTodoInput, setNewTodoInput] = useState<string>("");
+  const [editTodoInput, setEditTodoInput] = useState<string>("");
+  // const selectedTodo =
+  //   (selectedTodoId && todos.find((todo) => todo.id === selectedTodoId)) ||
+  //   null;
+
+  const handleCreateNewTodo = (e: React.FormEvent<HTMLFormElement>): void => {
+    e.preventDefault();
+    if (!newTodoInput.length) return;
+
+    dispatch(createTodoActionCreator({ desc: newTodoInput }));
+    setNewTodoInput("");
+  };
+
+  const handleNewInputChange = (value: string): void => {
+    setNewTodoInput(value);
+  };
 
   return (
     <Provider theme={defaultTheme}>
-      <div className="App">
-        <Flex gap="size-125" margin="size-100">
-          <Text>Todos Updated Count</Text>
-          <Divider orientation="vertical" />
-          <Text>5</Text>
+      <Content height="100%">
+        <Flex gap="size-125" minHeight="size-400" alignItems="center">
+          <Text marginStart="size-85">Todos Updated Count</Text>
+          <Divider orientation="vertical" width="size-25" />
+          <Text>5 {editTodoInput}</Text>
         </Flex>
 
         <Divider height="size-10" />
 
-        <header className="App-header">
-          <h1>Todo: Redux vs RTK Edition</h1>
+        <Flex direction="column" alignItems="center" justifyContent="center">
+          <Heading level={1}>Todo: Redux vs RTK Edition</Heading>
 
-          <Form labelPosition="side" labelAlign="start" maxWidth="size-3600">
-            <TextField label="Add new" />
-            <Button variant="cta">Save</Button>
+          <Form
+            labelPosition="side"
+            labelAlign="start"
+            maxWidth="size-3600"
+            onSubmit={handleCreateNewTodo}
+          >
+            <Flex direction="row" gap="size-125" alignItems="baseline">
+              <TextField
+                id="new-todo"
+                label="Add_new"
+                placeholder="Somthing to do..."
+                onChange={handleNewInputChange}
+                value={newTodoInput}
+                flex="2"
+              />
+              <Button variant="cta" type="submit" flex="1">
+                Create
+              </Button>
+            </Flex>
           </Form>
-        </header>
+        </Flex>
 
         <Flex
           direction="row"
           gap="size-100"
           justifyContent="space-evenly"
           width="100%"
+          height="100%"
         >
-          <View width="size-3000" backgroundColor="blue-600" flex="1">
+          <View
+            backgroundColor="gray-75"
+            maxWidth="size-4600"
+            flex="1"
+            padding="size-200"
+          >
             <h2>My Todos:</h2>
-
-            <ListBox aria-label="Alignment">
-              {todos.map((todo, i) => (
-                <Item key={todo.id}>
-                  {i + 1}:{todo.desc}
-                </Item>
-              ))}
+            {todos.toString()}
+            <ListBox width="100%" items={todos} selectionMode="single">
+              {(todo) => <Item>{todo.desc}</Item>}
             </ListBox>
           </View>
 
-          <View backgroundColor="blue-600" flex="1">
-            <ul className="App__list">
-              <h2>Selected Todos:</h2>
-            </ul>
+          <View
+            backgroundColor="gray-75"
+            maxWidth="size-4600"
+            padding="size-200"
+            flex="1"
+          >
+            <h2>Selected Todos:</h2>
 
             <Button variant="primary" onPressUp={() => {}}>
               Edit
@@ -90,12 +131,8 @@ function App() {
               Delete
             </Button>
           </View>
-
-          <View width="size-3000" backgroundColor="blue-600" flex="1">
-            <h2>My Todos:</h2>
-          </View>
         </Flex>
-      </div>
+      </Content>
     </Provider>
   );
 }
