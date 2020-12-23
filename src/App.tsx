@@ -30,7 +30,6 @@ import {
   // deleteTodoActionCreator,
   // selectedTodoActionCreator,
 } from "./redux-toolkit";
-import { combineReducers } from "@reduxjs/toolkit";
 
 function App() {
   const dispatch = useDispatch();
@@ -77,6 +76,7 @@ function App() {
             maxWidth="size-3600"
             onSubmit={handleCreateNewTodo}
           >
+
             <Flex direction="row" gap="size-125" alignItems="baseline">
               <TextField
                 id="new-todo"
@@ -106,9 +106,21 @@ function App() {
             flex="1"
             padding="size-200"
           >
+            <ul className="App__list">
+          <h2>My Todos:</h2>
+          {todos.map((todo, i) => (
+            <li
+              
+              key={todo.id}
+            >
+              <span className="list-number">{i + 1})</span> {todo.desc}
+            </li>
+          ))}
+        </ul>
+
             <h2>My Todos:</h2>
             {todos.toString()}
-            <ListBox width="100%" items={todos} selectionMode="single">
+            <ListBox width="100%" items={todos} selectionMode="none" aria-label="Alignment">
               {(todo) => <Item>{todo.desc}</Item>}
             </ListBox>
           </View>

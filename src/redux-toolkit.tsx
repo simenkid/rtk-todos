@@ -39,7 +39,8 @@ const todosSlice = createSlice({
           payload,
         }: PayloadAction<{ id: string; desc: string; isComplete: boolean }>
       ) => {
-        state.push(payload);
+        //state.push(payload);
+        return [ ...state, payload];
       },
       prepare: ({ desc }: { desc: string }) => ({
         payload: {
