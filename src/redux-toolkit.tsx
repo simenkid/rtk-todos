@@ -39,8 +39,7 @@ const todosSlice = createSlice({
           payload,
         }: PayloadAction<{ id: string; desc: string; isComplete: boolean }>
       ) => {
-        //state.push(payload);
-        return [ ...state, payload];
+        state.push(payload);
       },
       prepare: ({ desc }: { desc: string }) => ({
         payload: {
@@ -76,8 +75,8 @@ const todosSlice = createSlice({
   },
 });
 
-const selectedTodoSlice = createSlice({
-  name: "selectedTodo",
+const selectedTodoIdSlice = createSlice({
+  name: "selectedTodoId",
   initialState: null as string | null,
   reducers: {
     select: (state, { payload }: PayloadAction<{ id: string }>) => payload.id, // primitive: return value
@@ -103,11 +102,11 @@ export const {
   remove: deleteTodoActionCreator,
 } = todosSlice.actions;
 
-export const { select: selectedTodoActionCreator } = selectedTodoSlice.actions;
+export const { select: selectedTodoIdActionCreator } = selectedTodoIdSlice.actions;
 
 const rootReducer = combineReducers({
   todos: todosSlice.reducer,
-  selectedTodo: selectedTodoSlice.reducer,
+  selectedTodoId: selectedTodoIdSlice.reducer,
   counter: counterSlice.reducer,
 });
 

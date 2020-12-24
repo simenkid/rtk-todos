@@ -6,6 +6,6 @@ export interface Todo {
 
 export interface State {
   todos: Todop[];
-  selectedTodo: string | null;
+  selectedTodoId: string | null;
   counter: number;
 }

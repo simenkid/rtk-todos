@@ -1,7 +1,5 @@
 import * as React from "react";
-import * as RS from "@adobe/react-spectrum";
-
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
 
 import {
@@ -28,7 +26,7 @@ import "./App.css";
 import {
   createTodoActionCreator,
   editTodoActionCreator,
-  selectedTodoActionCreator,
+  selectedTodoIdActionCreator,
   toggleTodoActionCreator,
   deleteTodoActionCreator,
 } from "./redux-toolkit";
@@ -36,7 +34,7 @@ import {
 function App() {
   const dispatch = useDispatch();
   const todos = useSelector((state: State) => state.todos);
-  const selectedTodoId = useSelector((state: State) => state.selectedTodo);
+  const selectedTodoId = useSelector((state: State) => state.selectedTodoId);
   const editedCount = useSelector((state: State) => state.counter);
 
   // hooks for private state
@@ -65,7 +63,7 @@ function App() {
     setEditTodoInput("");
 
     const selectedId = todosId[0] || "";
-    dispatch(selectedTodoActionCreator({ id: selectedId }));
+    dispatch(selectedTodoIdActionCreator({ id: selectedId }));
   };
 
   const handleEditInputChange = (value: string): void => {
