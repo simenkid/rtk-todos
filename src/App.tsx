@@ -1,11 +1,13 @@
 import * as React from "react";
+import * as RS from "@adobe/react-spectrum";
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useSelector, useDispatch } from "react-redux";
 
 import {
   Provider,
   defaultTheme,
+  ActionButton,
   Button,
   Text,
   Divider,
@@ -25,24 +27,26 @@ import "./App.css";
 
 import {
   createTodoActionCreator,
-  // editTodoActionCreator,
-  // toggleTodoActionCreator,
-  // deleteTodoActionCreator,
-  // selectedTodoActionCreator,
+  editTodoActionCreator,
+  selectedTodoActionCreator,
+  toggleTodoActionCreator,
+  deleteTodoActionCreator,
 } from "./redux-toolkit";
 
 function App() {
   const dispatch = useDispatch();
   const todos = useSelector((state: State) => state.todos);
-  //const selectedTodoId = useSelector((state: State) => state.selectedTodo);
-  //const editedCount = useSelector((state: State) => state.counter);
+  const selectedTodoId = useSelector((state: State) => state.selectedTodo);
+  const editedCount = useSelector((state: State) => state.counter);
 
   // hooks for private state
   const [newTodoInput, setNewTodoInput] = useState<string>("");
   const [editTodoInput, setEditTodoInput] = useState<string>("");
-  // const selectedTodo =
-  //   (selectedTodoId && todos.find((todo) => todo.id === selectedTodoId)) ||
-  //   null;
+  const [isEditMode, setIsEditMode] = useState<boolean>(false);
+
+  let selectedTodo =
+    (selectedTodoId && todos.find((todo) => todo.id === selectedTodoId)) ||
+    null;
 
   const handleCreateNewTodo = (e: React.FormEvent<HTMLFormElement>): void => {
     e.preventDefault();
@@ -56,13 +60,81 @@ function App() {
     setNewTodoInput(value);
   };
 
+  const handleSelectedTodos = (todosId: string[]): void => {
+    setIsEditMode(false);
+    setEditTodoInput("");
+
+    const selectedId = todosId[0] || "";
+    dispatch(selectedTodoActionCreator({ id: selectedId }));
+  };
+
+  const handleEditInputChange = (value: string): void => {
+    setEditTodoInput(value);
+  };
+
+  const handleEdit = (): void => {
+    console.log(selectedTodo);
+
+    if (!selectedTodo) return;
+
+    setEditTodoInput(selectedTodo.desc);
+    setIsEditMode(true);
+  };
+
+  useEffect(() => {
+    if (isEditMode) {
+    }
+  }, [isEditMode]);
+
+  const handleUpdate = (e: React.FormEvent<HTMLFormElement>): void => {
+    e.preventDefault();
+
+    if (!editTodoInput.length || !selectedTodoId) {
+      handleCancelUpdate();
+      return;
+    }
+
+    dispatch(
+      editTodoActionCreator({ id: selectedTodoId, desc: editTodoInput })
+    );
+    setIsEditMode(false);
+    setEditTodoInput("");
+  };
+
+  const handleCancelUpdate = (e?: React.MouseEvent): void => {
+    e?.preventDefault();
+
+    setIsEditMode(false);
+    setEditTodoInput("");
+  };
+
+  const todoDoneStyling = (isComplete: boolean) =>
+    isComplete ? { textDecoration: "line-through" } : {};
+
+  const handleToggle = (): void => {
+    if (!selectedTodoId || !selectedTodo) return;
+
+    dispatch(
+      toggleTodoActionCreator({
+        id: selectedTodoId,
+        isComplete: !selectedTodo.isComplete,
+      })
+    );
+  };
+
+  const handleDelete = (): void => {
+    if (!selectedTodoId || !selectedTodo) return;
+
+    dispatch(deleteTodoActionCreator({ id: selectedTodoId }));
+  };
+
   return (
     <Provider theme={defaultTheme}>
       <Content height="100%">
         <Flex gap="size-125" minHeight="size-400" alignItems="center">
           <Text marginStart="size-85">Todos Updated Count</Text>
           <Divider orientation="vertical" width="size-25" />
-          <Text>5 {editTodoInput}</Text>
+          <Text>{editedCount}</Text>
         </Flex>
 
         <Divider height="size-10" />
@@ -76,7 +148,6 @@ function App() {
             maxWidth="size-3600"
             onSubmit={handleCreateNewTodo}
           >
-
             <Flex direction="row" gap="size-125" alignItems="baseline">
               <TextField
                 id="new-todo"
@@ -106,22 +177,23 @@ function App() {
             flex="1"
             padding="size-200"
           >
-            <ul className="App__list">
-          <h2>My Todos:</h2>
-          {todos.map((todo, i) => (
-            <li
-              
-              key={todo.id}
+            <Heading level={2}>My Todos:</Heading>
+            <ListBox
+              width="100%"
+              items={todos}
+              selectionMode="single"
+              aria-label="Alignment"
+              onSelectionChange={(selected) =>
+                handleSelectedTodos(Array.from(selected) as string[])
+              }
             >
-              <span className="list-number">{i + 1})</span> {todo.desc}
-            </li>
-          ))}
-        </ul>
-
-            <h2>My Todos:</h2>
-            {todos.toString()}
-            <ListBox width="100%" items={todos} selectionMode="none" aria-label="Alignment">
-              {(todo) => <Item>{todo.desc}</Item>}
+              {(todo) => (
+                <Item key={todo.id} textValue={todo.desc}>
+                  <Text UNSAFE_style={todoDoneStyling(todo.isComplete)}>
+                    {todo.desc}
+                  </Text>
+                </Item>
+              )}
             </ListBox>
           </View>
 
@@ -131,17 +203,45 @@ function App() {
             padding="size-200"
             flex="1"
           >
-            <h2>Selected Todos:</h2>
+            <Heading level={2}>Selected Todos:</Heading>
+            {selectedTodo === null ? (
+              <Text>No Todo Selected</Text>
+            ) : (
+              <Text>{selectedTodo.desc}</Text>
+            )}
 
-            <Button variant="primary" onPressUp={() => {}}>
-              Edit
-            </Button>
-            <Button variant="primary" onPressUp={() => {}}>
-              Toggle
-            </Button>
-            <Button variant="primary" onPressUp={() => {}}>
-              Delete
-            </Button>
+            <Flex direction="row" gap="size-125" alignItems="baseline">
+              <ActionButton onPress={handleEdit}>Edit</ActionButton>
+              <ActionButton onPress={handleToggle}>Toggle</ActionButton>
+              <ActionButton onPress={handleDelete}>Delete</ActionButton>
+            </Flex>
+
+            {isEditMode ? (
+              <Form
+                labelPosition="top"
+                labelAlign="start"
+                maxWidth="size-3600"
+                onSubmit={handleUpdate}
+              >
+                <TextField
+                  id="edit-todo"
+                  label="Edit todo"
+                  autoFocus={true}
+                  onChange={handleEditInputChange}
+                  value={editTodoInput}
+                />
+                <ActionButton type="submit">Update</ActionButton>
+                <ActionButton
+                  onPress={() => {
+                    handleCancelUpdate();
+                  }}
+                >
+                  Cancel
+                </ActionButton>
+              </Form>
+            ) : (
+              ""
+            )}
           </View>
         </Flex>
       </Content>

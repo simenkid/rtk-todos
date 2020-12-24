@@ -9,7 +9,7 @@
       "esnext"
     ],
     "allowJs": true,
-    "jsx": "react-jsx",
+    "jsx": "react",
     "declaration": true,
     "sourceMap": true,
     "noEmit": true,
